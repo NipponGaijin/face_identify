@@ -1,5 +1,6 @@
 import uuid
 
+from datetime import datetime
 from .base import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import UUID, TEXT, TIMESTAMP
@@ -13,12 +14,12 @@ class Customer(Base):
     user_info_json = Column(TEXT)
 
 
-    def __init__(self, user_info_json, create_date):
+    def __init__(self, user_info_json):
         """
         Конструктор класса для сущности таблицы Customer
         :param user_info_json: Строка с атрибутами посетителя
         :param create_date: Дата создания
         """
-        self.create_date = create_date
         self.user_info_json = user_info_json
+        self.create_date = datetime.utcnow()
 

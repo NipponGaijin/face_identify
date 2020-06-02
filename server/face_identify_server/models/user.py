@@ -17,7 +17,7 @@ class User(Base):
     password = Column(TEXT)
 
 
-    def __init__(self, login, password, create_date):
+    def __init__(self, login, password):
         """
         Конструктор класса сущности пользователя системы
         :param login:   Логин пользователя
@@ -27,6 +27,10 @@ class User(Base):
         self.login = login
         self.password = generate_password_hash(password)
         self.create_date = datetime.utcnow()
+
+    def check_hash(self, password):
+        result = check_password_hash(self.password, password)
+        return result
 
 
 

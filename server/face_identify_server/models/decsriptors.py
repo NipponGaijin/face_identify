@@ -1,5 +1,6 @@
 import uuid
 
+from datetime import datetime
 from .base import Base
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
@@ -20,5 +21,5 @@ class Descriptors(Base):
         :param create_date: Дата создания записи
         """
         self.descriptor = descriptor
-        self.create_date = create_date
+        self.create_date = datetime.utcnow()
 
