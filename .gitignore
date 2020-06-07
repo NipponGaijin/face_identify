@@ -1,1 +1,12 @@
 server/face_identify_server/models/__pycache__/
+client/faceRecognitionClient_v01/packages/
+client/faceRecognitionClient_v01/faceRecognition/obj/
+client/faceRecognitionClient_v01/faceRecognition/bin/Release/x64/cvextern.dll
+client/faceRecognitionClient_v01/faceRecognition/bin/
+client/faceRecognitionClient_v01/faceRecognition/cublas32_42_9.dll
+client/faceRecognitionClient_v01/faceRecognition/cublas64_42_9.dll
+client/faceRecognitionClient_v01/faceRecognition/opencv_gpu240.dll
+client/faceRecognitionClient_v01/faceRecognition/cufft32_42_9.dll
+client/faceRecognitionClient_v01/faceRecognition/cufft64_42_9.dll
+client/faceRecognitionClient_v01/faceRecognition/npp32_42_9.dll
+client/faceRecognitionClient_v01/faceRecognition/npp64_42_9.dll
