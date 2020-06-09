@@ -10,3 +10,4 @@ client/faceRecognitionClient_v01/faceRecognition/cufft32_42_9.dll
 client/faceRecognitionClient_v01/faceRecognition/cufft64_42_9.dll
 client/faceRecognitionClient_v01/faceRecognition/npp32_42_9.dll
 client/faceRecognitionClient_v01/faceRecognition/npp64_42_9.dll
+server/face_identify_server/files/

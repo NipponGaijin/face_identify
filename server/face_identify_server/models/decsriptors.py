@@ -14,7 +14,7 @@ class Descriptors(Base):
     customer_id = Column(UUID, ForeignKey('customer.id'))
     descriptor = Column(ARRAY(DOUBLE_PRECISION))
 
-    def __init__(self, descriptor, create_date):
+    def __init__(self, descriptor, customer_id):
         """
         Конструктор класса для таблицы Descriptors
         :param descriptor: Дескриптор лица (массив из 128 double чисел)
@@ -22,4 +22,5 @@ class Descriptors(Base):
         """
         self.descriptor = descriptor
         self.create_date = datetime.utcnow()
+        self.customer_id = str(customer_id)
 
