@@ -12,7 +12,7 @@ from sklearn import svm
 from sklearn.decomposition import PCA
 from json import JSONDecodeError
 from PIL import Image
-from exceptions import AuthException, EmptyHeader, BadToken, EmptyUserId, UserNotFound
+from exceptions import AuthException, EmptyHeader, BadToken, EmptyUserId, UserNotFound, FindCustomerException
 from flask import Flask, request, Response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -101,10 +101,21 @@ def identify():
 
         descriptor = get_descriptor(image)
         if descriptor is None:
-            return "Не удалось извлечь дескриптор лица человека из изображения"
+            return "Не удалось извлечь дескриптор лица человека из изображения", 400
 
+        if check_novelty(descriptor) == True:
+            return "Посетитель не известен в системе, необходимо добавить его", 400
 
+        customer = get_customer(descriptor)
+        if customer is None:
+            return "Посетитель не найден в системе, необходимо добавить его", 400
 
+        response_object = {
+            'id': str(customer.id),
+            'attributes': customer.user_info_json,
+            'create_date': str(customer.create_date)
+        }
+        return Response(json.dumps(response_object), content_type='application/json; charset=utf-8'), 200
 
 
     except AuthException as ex:
@@ -171,7 +182,7 @@ def add_client():
         session.close()
 
         response_data = {
-            'userid': str(customer.id)
+            'customer_id': str(customer.id)
         }
 
         return Response(json.dumps(response_data), content_type='application/json; charset=utf-8'), 200
@@ -233,6 +244,29 @@ def create_session():
     Session.configure(bind=engine)
     # session = Session()
     return Session()
+
+# Поиск посетителя по дескриптору
+def get_customer(descriptor):
+    session = create_session()
+
+    descriptors = session.query(models.Descriptors).all()
+    customer = None
+    dist = 0.6
+    for desc in descriptors:
+        ed = np.linalg.norm(np.asarray(desc.descriptor) - np.asarray(descriptor))
+        if (ed < dist):
+            dist = ed
+            customer = desc.customer_id
+
+    if customer == None:
+        raise FindCustomerException("Посетитель не найден в системе, необходимо его добавить")
+    customer = session.query(models.Customer).filter_by(id=customer).first()
+
+    if customer == None:
+        raise FindCustomerException("Запись посетителя, соответствующая дескриптору не найдена в системе, необходимо добавить посетителя")
+
+    session.close()
+    return customer
 
 # Проверка новизны дескриптора
 def check_novelty(descriptor):
