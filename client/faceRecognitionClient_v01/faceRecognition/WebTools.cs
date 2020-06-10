@@ -108,8 +108,53 @@ namespace faceRecognition
                     }
                 }
             }
-            
         }
+
+        /// <summary>
+        /// Перегрузка предыдущего метода для отправки серверу только изображения
+        /// </summary>
+        /// <param name="serverAddress">Адрес сервера</param>
+        /// <param name="token">Токен авторизации</param>
+        /// <param name="filename">Имя файла</param>
+        /// <returns>Возвращает ответ сервера</returns>
+
+        public JObject AddImage(string serverAddress, string token, string filename, string customerId)
+        {
+            UriBuilder serverUriBuilder = new UriBuilder(serverAddress);
+            serverUriBuilder.Path = $"/add_file/{customerId}";
+
+            byte[] imageByte = File.ReadAllBytes(filename);
+            File.Delete(filename);
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                using (var content = new MultipartFormDataContent())
+                {
+                    content.Add(new ByteArrayContent(imageByte), "file", "file.jpg");
+                    try
+                    {
+                        var response = client.PostAsync(serverUriBuilder.Uri.AbsoluteUri, content).Result;
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            string responseString = response.Content.ReadAsStringAsync().Result;
+                            JObject result = JObject.Parse(responseString);
+                            return result;
+                        }
+                        else
+                        {
+                            string responseString = response.Content.ReadAsStringAsync().Result;
+                            throw new IdentifyException(responseString, (int)response.StatusCode);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new IdentifyException(e.Message);
+                    }
+                }
+            }
+        }
+
+
 
         /// <summary>
         /// Метод для отправки запроса функции полнотекстового поиска
@@ -219,9 +264,29 @@ namespace faceRecognition
         /// <param name="filename">Имя файла на сервере</param>
         /// <param name="serverAddress">Адрес сервера</param>
 
-        public void downloadFileFromServer(string filename, string serverAddress)
+        public void downloadFileFromServer(string filename, string serverAddress, string token)
         {
-            webClient.DownloadFile(serverAddress + "/download_image/images/" + filename, "images\\" + filename);
+            UriBuilder serverUriBuilder = new UriBuilder(serverAddress);
+            serverUriBuilder.Path = $"/download_file/{filename}";
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                HttpResponseMessage response = client.GetAsync(serverUriBuilder.ToString()).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var contentStream = response.Content.ReadAsStreamAsync().Result;
+                    string path = Directory.GetCurrentDirectory();
+                    using (var fileStream = new FileStream($"{path}\\images\\{filename}.jpg", FileMode.Create, FileAccess.Write))
+                    {
+                        contentStream.CopyTo(fileStream);
+                    }
+                }
+                else
+                {
+                    throw new DownloadFileException(response.Content.ReadAsStringAsync().Result, (int)response.StatusCode);
+                }
+            }
         }
 
         /// <summary>

@@ -46,7 +46,7 @@ namespace faceRecognition
         static string idInDb = "";
         static bool stringResponsed = false;
         static bool buttonEnable = true;
-        static JToken responseFromServer = null;
+        static JObject responseFromServer = null;
         public int maxFace;
         public int minFace;
         public string address = "";
@@ -150,6 +150,7 @@ namespace faceRecognition
             }
             //Если запрос стартовал, выключаем кнопки
             buttonIdentify.Enabled = !requestIsStarted;
+            btnAddNewImage.Enabled = !addingImageStarted;
 
             //Если лиц не найдено
             if (Faces[0].Length == 0)
@@ -202,8 +203,8 @@ namespace faceRecognition
                 idInDb = responseFromServer.Value<string>("id");
                 //Устанавливаем изображение в поле IdentifyedUser
                 //TODO сделать запрос изображений
-                //Image<Rgb, Byte> downlodadedImage = new Image<Rgb, Byte>(@"images\" + filenames[currentIndex]);
-                //IdentifyedUser.Image = downlodadedImage;
+                Image<Rgb, Byte> downlodadedImage = new Image<Rgb, Byte>($"images\\{filenames[currentIndex]}.jpg");
+                IdentifyedUser.Image = downlodadedImage;
                 //Формирование списка названий полей
                 List<string> listOfKeys = new List<string>(jsonDict.Keys);
                 dataTableIndent.Rows.Clear();
@@ -239,6 +240,24 @@ namespace faceRecognition
                 try
                 {
                     responseFromServer = postClass.Identify(address, token, "savedIdentifyFrame.jpg");
+                    //Скачивание файлов с сервера (имена файлов берутся из JSON строки)
+                    filenames = new List<string>();
+                    currentIndex = 0;
+                    JArray images = (JArray)responseFromServer["images"];
+                    WebTools downloadTool = new WebTools();
+                    foreach (string image in images)
+                    {
+                        try
+                        {
+                            downloadTool.downloadFileFromServer(image, address, token);
+                            filenames.Add(image);
+                        }
+                        catch (DownloadFileException e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                    }
                 }
                 catch (IdentifyException e)
                 {
@@ -247,17 +266,6 @@ namespace faceRecognition
                     //buttonEnable = true;
                     stringResponsed = true;
                 }
-
-                //TODO сделать скачивание с сервера
-
-                ////Скачивание файлов с сервера (имена файлов берутся из JSON строки)
-                //var jsonDict = new JavaScriptSerializer().Deserialize<Dictionary<string, dynamic>>(resultOfRequest[1]);
-                //List<string> listOfKeys = new List<string>(jsonDict["filenames"].Keys);
-                //WebTools downloadTool = new WebTools();
-                //for (int i = 0; i < listOfKeys.Count; i++)
-                //{
-                //    downloadTool.downloadFileFromServer(listOfKeys[i], address);
-                //}
 
                 requestIsStarted = false;
                 //buttonEnable = true;
@@ -409,13 +417,13 @@ namespace faceRecognition
             if (currentIndex < filenames.Count - 1)
             {
                 currentIndex++;
-                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>("images\\" + filenames[currentIndex]);
+                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>($"images\\{filenames[currentIndex]}.jpg");
                 IdentifyedUser.Image = viewedImage;
             }
             else
             {
                 currentIndex = 0;
-                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>("images\\" + filenames[currentIndex]);
+                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>($"images\\{filenames[currentIndex]}.jpg");
                 IdentifyedUser.Image = viewedImage;
             }
         }
@@ -425,13 +433,13 @@ namespace faceRecognition
             if (currentIndex == 0)
             {
                 currentIndex = filenames.Count - 1;
-                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>("images\\" + filenames[currentIndex]);
+                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>($"images\\{filenames[currentIndex]}.jpg");
                 IdentifyedUser.Image = viewedImage;
             }
             else
             {
                 currentIndex--;
-                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>("images\\" + filenames[currentIndex]);
+                Image<Bgr, Byte> viewedImage = new Image<Bgr, byte>($"images\\{filenames[currentIndex]}.jpg");
                 IdentifyedUser.Image = viewedImage;
             }
         }
@@ -443,6 +451,44 @@ namespace faceRecognition
             foreach (var v in filesToDelete)
             {
                 File.Delete(v);
+            }
+        }
+
+        async void addNewImage(string customerId)
+        {
+            //Функция добавления нового изображения
+
+            addingImageStarted = true;
+            try
+            {
+                WebTools addImage = new WebTools();
+                try
+                {
+                    JObject request = addImage.AddImage(address, token, "imageToAdd.jpg", customerId);
+                    addingImageStarted = false;
+                    MessageBox.Show("Добавлено");
+                }
+                catch (AddFileException ex) 
+                {
+                    addingImageStarted = false;
+                    MessageBox.Show($"Не добавлено, ошибка: {ex.Message}");
+                }
+                
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+                addingImageStarted = false;
+            }
+        }
+
+        private void btnAddNewImage_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(idInDb) && readyToIdentify)
+            {
+                Image<Bgr, Byte> imageToAdd = capWebcam.QueryFrame();
+                imageToAdd.Save("imageToAdd.jpg");
+                Task addNewImageTask = Task.Run(() => addNewImage(idInDb));
             }
         }
     }

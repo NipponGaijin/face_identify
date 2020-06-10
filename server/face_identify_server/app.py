@@ -7,15 +7,17 @@ import numpy as np
 import dlib
 import uuid
 import os
+from pathlib import Path
 
 from sklearn import svm
 from sklearn.decomposition import PCA
 from json import JSONDecodeError
 from PIL import Image
 from exceptions import AuthException, EmptyHeader, BadToken, EmptyUserId, UserNotFound, FindCustomerException
-from flask import Flask, request, Response
+from flask import Flask, request, Response, send_file
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 
 connection_string = "postgresql://postgres:postgres@localhost:5432/face_identify"
 models.CreateDb(connection_string)
@@ -113,10 +115,22 @@ def identify():
         if customer is None:
             return "Посетитель не найден в системе, необходимо добавить его", 400
 
+        # Получение идентификаторов файлов лица посетителя
+        images = []
+        session = create_session()
+
+        files = session.query(models.FaceImage).filter_by(customer_id=str(customer.id)).all()
+        for file in files:
+            images.append(str(file.id))
+
+        session.close()
+
+
         response_object = {
             'id': str(customer.id),
             'attributes': customer.user_info_json,
-            'create_date': str(customer.create_date)
+            'create_date': str(customer.create_date),
+            'images': images
         }
         return Response(json.dumps(response_object), content_type='application/json; charset=utf-8'), 200
 
@@ -156,6 +170,7 @@ def add_client():
 
         try:
             attributes = json.loads(attributes)
+            attributes["Дата создания"] = datetime.now().strftime("%Y.%m.%d %H:%M:%S")
         except JSONDecodeError as ex:
             return "Атрибуты посетителя переданы в некорректном формате: {}".format(ex), 400
 
@@ -193,6 +208,62 @@ def add_client():
     except AuthException as ex:
         return ex.message, 401
 
+# Скачать файл
+@app.route('/download_file/<file_id>', methods=["GET"])
+def download_file(file_id):
+    try:
+        check_auth(request)
+        files = []
+        for path in Path('files').rglob('{}.jpg'.format(file_id)):
+            files.append(path)
+        if len(files) <= 0:
+            return "Файл не найден", 404
+        return send_file(files[0], as_attachment=True)
+    except AuthException as ex:
+        return ex.message, 401
+
+# Добавление посетителя в БД
+@app.route('/add_file/<customer_id>', methods=["POST"])
+def add_file(customer_id):
+    try:
+        # Проверка авторизации
+        check_auth(request)
+
+        # Проверка типа содержимого
+        content_type = request.headers.get("Content-Type")
+
+        if content_type.find('multipart/form-data') == -1:
+            return "Содержимое запроса должно иметь тип 'multipart/form-data'", 400
+
+        # Получение файла изображения из запроса
+        if 'file' not in request.files:
+            return "В запросе отсутствует файл изображения лица идентифицируемого человека", 400
+
+        image = request.files['file'].read()
+        image = Image.open(io.BytesIO(image))
+        image = np.array(image)
+
+        session = create_session()
+        customer = session.query(models.Customer).filter_by(id=customer_id).first()
+        if customer is None:
+            return "Посетитель не найден в системе", 404
+
+        face_image_id = uuid.uuid4()
+        face_image = models.FaceImage(face_image_id, "{0}/{1}.jpg".format(customer.id, face_image_id), customer.id)
+        session.add(face_image)
+
+        cv2.imwrite("files/{0}/{1}.jpg".format(customer.id, face_image_id), image)
+
+        session.commit()
+        session.close()
+
+        response_data = {
+            'file_id': str(face_image_id)
+        }
+
+        return Response(json.dumps(response_data), content_type='application/json; charset=utf-8'), 200
+    except AuthException as ex:
+        return ex.message, 401
 
 # Проверка авторизации в запросе
 def check_auth(request):

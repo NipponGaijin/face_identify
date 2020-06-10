@@ -48,6 +48,7 @@
             this.dataTableIndent = new System.Windows.Forms.DataGridView();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.settings = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnAddNewImage = new System.Windows.Forms.Button();
             this.labelInfoFlowLayout.SuspendLayout();
             this.buttonsFlowLayout.SuspendLayout();
             this.tableTools.SuspendLayout();
@@ -190,6 +191,7 @@
             this.toolButtonPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.toolButtonPanel.Controls.Add(this.IdentifyedUser, 0, 3);
             this.toolButtonPanel.Controls.Add(this.navButtons, 0, 4);
+            this.toolButtonPanel.Controls.Add(this.btnAddNewImage, 0, 5);
             this.toolButtonPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolButtonPanel.Location = new System.Drawing.Point(482, 3);
             this.toolButtonPanel.Name = "toolButtonPanel";
@@ -282,6 +284,19 @@
             this.settings.Text = "Настройки";
             this.settings.Click += new System.EventHandler(this.settings_Click);
             // 
+            // btnAddNewImage
+            // 
+            this.btnAddNewImage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddNewImage.Location = new System.Drawing.Point(3, 315);
+            this.btnAddNewImage.Name = "btnAddNewImage";
+            this.btnAddNewImage.Size = new System.Drawing.Size(151, 39);
+            this.btnAddNewImage.TabIndex = 4;
+            this.btnAddNewImage.Text = "Добавить изображение";
+            this.btnAddNewImage.UseVisualStyleBackColor = true;
+            this.btnAddNewImage.Click += new System.EventHandler(this.btnAddNewImage_Click);
+            // 
             // FormIdentify
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -334,9 +349,6 @@
         private System.Windows.Forms.TableLayoutPanel navButtons;
         private System.Windows.Forms.Button buttonPrev;
         private System.Windows.Forms.Button buttonNext;
-
-
-
-
+        private System.Windows.Forms.Button btnAddNewImage;
     }
 }

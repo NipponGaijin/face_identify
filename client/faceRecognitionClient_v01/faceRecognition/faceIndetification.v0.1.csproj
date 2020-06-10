@@ -79,6 +79,8 @@
   <ItemGroup>
     <Compile Include="Exceptions\AddCustomerException.cs" />
     <Compile Include="Exceptions\AuthException.cs" />
+    <Compile Include="Exceptions\DownloadFileException.cs" />
+    <Compile Include="Exceptions\AddFileException.cs" />
     <Compile Include="Exceptions\IdentifyException.cs" />
     <Compile Include="FormAddToDB.cs">
       <SubType>Form</SubType>
