@@ -26,6 +26,7 @@ shape_predictor = dlib.shape_predictor('dlib_models/shape_predictor_68_face_land
 face_rec_model = dlib.face_recognition_model_v1('dlib_models/dlib_face_recognition_resnet_model_v1.dat')
 classificator = None
 
+
 @app.route('/createuser/<username>/<password>', methods=["GET"])
 def create_user(username, password):
     session = create_session()
@@ -39,6 +40,7 @@ def create_user(username, password):
         session.commit()
         session.close()
         return "ok", 200
+
 
 # Авторизация (получение JWT токена)
 @app.route('/auth', methods=["POST"])
@@ -64,8 +66,8 @@ def auth():
         encoded_jwt = jwt.encode({
             'id': user_id
         },
-        'secret',
-        algorithm='HS256'
+            'secret',
+            algorithm='HS256'
         )
 
         ret_body = {
@@ -77,6 +79,7 @@ def auth():
     else:
         session.close()
         return "Неверный пароль", 401
+
 
 # Идентификация по изображению
 @app.route('/identify', methods=["POST"])
@@ -120,6 +123,7 @@ def identify():
 
     except AuthException as ex:
         return ex.message, 401
+
 
 # Добавление посетителя в БД
 @app.route('/add_client', methods=["POST"])
@@ -189,6 +193,7 @@ def add_client():
     except AuthException as ex:
         return ex.message, 401
 
+
 # Проверка авторизации в запросе
 def check_auth(request):
     auth_header = request.headers.get("Authorization")
@@ -218,6 +223,7 @@ def check_auth(request):
         session.close()
         return True
 
+
 def get_descriptor(img):
     """
     Получение дескриптора лица на изображении
@@ -245,6 +251,7 @@ def create_session():
     # session = Session()
     return Session()
 
+
 # Поиск посетителя по дескриптору
 def get_customer(descriptor):
     session = create_session()
@@ -263,10 +270,12 @@ def get_customer(descriptor):
     customer = session.query(models.Customer).filter_by(id=customer).first()
 
     if customer == None:
-        raise FindCustomerException("Запись посетителя, соответствующая дескриптору не найдена в системе, необходимо добавить посетителя")
+        raise FindCustomerException(
+            "Запись посетителя, соответствующая дескриптору не найдена в системе, необходимо добавить посетителя")
 
     session.close()
     return customer
+
 
 # Проверка новизны дескриптора
 def check_novelty(descriptor):
@@ -286,7 +295,7 @@ def check_novelty(descriptor):
             dist = 0.6
             for desc in descriptors:
                 ed = np.linalg.norm(np.asarray(desc.descriptor) - np.asarray(descriptor))
-                if(ed < dist):
+                if (ed < dist):
                     dist = ed
                     customer = desc
             if customer != None:
@@ -322,11 +331,9 @@ def learn_classificator():
             classificator = svm.OneClassSVM(kernel="poly", degree=3, nu=0.1, gamma='auto')
             classificator.fit(descriptors)
 
-
     session.close()
+
 
 if __name__ == "__main__":
     # learn_classificator()
     app.run("localhost", debug=False)
-
-

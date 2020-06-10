@@ -37,19 +37,14 @@
             this.btnAddUser = new System.Windows.Forms.Button();
             this.buttonsFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.tableTools = new System.Windows.Forms.TableLayoutPanel();
-            this.btnSearch = new System.Windows.Forms.Button();
             this.buttonIdentify = new System.Windows.Forms.Button();
             this.tableContainer = new System.Windows.Forms.TableLayoutPanel();
             this.VideoBox = new Emgu.CV.UI.ImageBox();
             this.toolButtonPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.clearTable = new System.Windows.Forms.Button();
-            this.buttonUpdateRecord = new System.Windows.Forms.Button();
-            this.buttonDeleteRecord = new System.Windows.Forms.Button();
             this.IdentifyedUser = new Emgu.CV.UI.ImageBox();
             this.navButtons = new System.Windows.Forms.TableLayoutPanel();
             this.buttonPrev = new System.Windows.Forms.Button();
             this.buttonNext = new System.Windows.Forms.Button();
-            this.btnAddNewImage = new System.Windows.Forms.Button();
             this.dataTableIndent = new System.Windows.Forms.DataGridView();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.settings = new System.Windows.Forms.ToolStripMenuItem();
@@ -140,7 +135,6 @@
             this.tableTools.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 132F));
             this.tableTools.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 115F));
             this.tableTools.Controls.Add(this.labelInfoFlowLayout, 1, 0);
-            this.tableTools.Controls.Add(this.btnSearch, 4, 0);
             this.tableTools.Controls.Add(this.btnAddUser, 3, 0);
             this.tableTools.Controls.Add(this.buttonIdentify, 2, 0);
             this.tableTools.Location = new System.Drawing.Point(47, 3);
@@ -149,17 +143,6 @@
             this.tableTools.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableTools.Size = new System.Drawing.Size(981, 63);
             this.tableTools.TabIndex = 45;
-            // 
-            // btnSearch
-            // 
-            this.btnSearch.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnSearch.Location = new System.Drawing.Point(869, 3);
-            this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(109, 57);
-            this.btnSearch.TabIndex = 42;
-            this.btnSearch.Text = "Искать пользователя";
-            this.btnSearch.UseVisualStyleBackColor = true;
-            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // buttonIdentify
             // 
@@ -205,12 +188,8 @@
             // 
             this.toolButtonPanel.ColumnCount = 1;
             this.toolButtonPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.toolButtonPanel.Controls.Add(this.clearTable, 0, 2);
-            this.toolButtonPanel.Controls.Add(this.buttonUpdateRecord, 0, 0);
-            this.toolButtonPanel.Controls.Add(this.buttonDeleteRecord, 0, 1);
             this.toolButtonPanel.Controls.Add(this.IdentifyedUser, 0, 3);
             this.toolButtonPanel.Controls.Add(this.navButtons, 0, 4);
-            this.toolButtonPanel.Controls.Add(this.btnAddNewImage, 0, 5);
             this.toolButtonPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolButtonPanel.Location = new System.Drawing.Point(482, 3);
             this.toolButtonPanel.Name = "toolButtonPanel";
@@ -224,38 +203,6 @@
             this.toolButtonPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 8F));
             this.toolButtonPanel.Size = new System.Drawing.Size(157, 375);
             this.toolButtonPanel.TabIndex = 52;
-            // 
-            // clearTable
-            // 
-            this.clearTable.Location = new System.Drawing.Point(3, 83);
-            this.clearTable.Name = "clearTable";
-            this.clearTable.Size = new System.Drawing.Size(151, 34);
-            this.clearTable.TabIndex = 2;
-            this.clearTable.Text = "Очистить таблицу";
-            this.clearTable.UseVisualStyleBackColor = true;
-            this.clearTable.Click += new System.EventHandler(this.clearTable_Click);
-            // 
-            // buttonUpdateRecord
-            // 
-            this.buttonUpdateRecord.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonUpdateRecord.Location = new System.Drawing.Point(3, 3);
-            this.buttonUpdateRecord.Name = "buttonUpdateRecord";
-            this.buttonUpdateRecord.Size = new System.Drawing.Size(151, 34);
-            this.buttonUpdateRecord.TabIndex = 0;
-            this.buttonUpdateRecord.Text = "Редактировать\r\nзапись\r\n";
-            this.buttonUpdateRecord.UseVisualStyleBackColor = true;
-            this.buttonUpdateRecord.Click += new System.EventHandler(this.buttonUpdateRecord_Click);
-            // 
-            // buttonDeleteRecord
-            // 
-            this.buttonDeleteRecord.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonDeleteRecord.Location = new System.Drawing.Point(3, 43);
-            this.buttonDeleteRecord.Name = "buttonDeleteRecord";
-            this.buttonDeleteRecord.Size = new System.Drawing.Size(151, 34);
-            this.buttonDeleteRecord.TabIndex = 1;
-            this.buttonDeleteRecord.Text = "Удалить\r\nзапись";
-            this.buttonDeleteRecord.UseVisualStyleBackColor = true;
-            this.buttonDeleteRecord.Click += new System.EventHandler(this.buttonDeleteRecord_Click);
             // 
             // IdentifyedUser
             // 
@@ -302,17 +249,6 @@
             this.buttonNext.Text = "Next";
             this.buttonNext.UseVisualStyleBackColor = true;
             this.buttonNext.Click += new System.EventHandler(this.buttonNext_Click);
-            // 
-            // btnAddNewImage
-            // 
-            this.btnAddNewImage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnAddNewImage.Location = new System.Drawing.Point(3, 315);
-            this.btnAddNewImage.Name = "btnAddNewImage";
-            this.btnAddNewImage.Size = new System.Drawing.Size(151, 39);
-            this.btnAddNewImage.TabIndex = 4;
-            this.btnAddNewImage.Text = "Добавить новое изображение";
-            this.btnAddNewImage.UseVisualStyleBackColor = true;
-            this.btnAddNewImage.Click += new System.EventHandler(this.btnAddNewImage_Click);
             // 
             // dataTableIndent
             // 
@@ -384,25 +320,20 @@
         private System.Windows.Forms.Label lblFoundStatus;
         private System.Windows.Forms.Button btnAddUser;
         private System.Windows.Forms.FlowLayoutPanel buttonsFlowLayout;
-        private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.TableLayoutPanel tableContainer;
         private System.Windows.Forms.DataGridView dataTableIndent;
         private Emgu.CV.UI.ImageBox VideoBox;
         private System.Windows.Forms.Label lblSearching;
         private System.Windows.Forms.TableLayoutPanel tableTools;
         private System.Windows.Forms.TableLayoutPanel toolButtonPanel;
-        private System.Windows.Forms.Button buttonUpdateRecord;
-        private System.Windows.Forms.Button buttonDeleteRecord;
         private System.Windows.Forms.Label lblUpdateDeleteInfo;
         private System.Windows.Forms.Button buttonIdentify;
-        private System.Windows.Forms.Button clearTable;
         private Emgu.CV.UI.ImageBox IdentifyedUser;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem settings;
         private System.Windows.Forms.TableLayoutPanel navButtons;
         private System.Windows.Forms.Button buttonPrev;
         private System.Windows.Forms.Button buttonNext;
-        private System.Windows.Forms.Button btnAddNewImage;
 
 
 

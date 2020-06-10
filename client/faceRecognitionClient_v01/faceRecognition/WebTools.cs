@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading;
 using System.IO;
 using System.Net;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Net.Http;
+using faceRecognition.Exceptions;
 
 namespace faceRecognition
 {
@@ -15,85 +19,96 @@ namespace faceRecognition
     {
         bool disposed = false;
         public WebClient webClient = new WebClient();
-        
+
         /// <summary>
-        /// Метод отправки на сервер изображения и JSON строки с ним 
+        /// Метод отправки на сервер изображения и JSON строки с ним
         /// </summary>
-        /// <param name="serverAddress">Адрес сервера</param>
-        /// <param name="filename">Имя файла</param>
-        /// <param name="serverMethod">Метод сервера</param>
-        /// <param name="strToPost">JSON строка для отправки</param>
-        /// <returns> Ответ от сервера </returns>
-        public string postImageToServer(string serverAddress, string filename, string serverMethod, string strToPost)
+        /// <param name="serverAddress">Адресс сервера</param>
+        /// <param name="token">Токен авторизации</param>
+        /// <param name="filename">Имя пользователя</param>
+        /// <param name="strToPost">Контент для загрузки</param>
+        /// <returns></returns>
+        public JObject AddCustomer(string serverAddress, string token, string filename, string strToPost)
         {
-            
+
+            UriBuilder serverUriBuilder = new UriBuilder(serverAddress);
+            serverUriBuilder.Path = "/add_client";
+
             byte[] imageByte = File.ReadAllBytes(filename);
             File.Delete(filename);
-            byte[] stringToRequest = Encoding.UTF8.GetBytes(strToPost + "<image>");
-            WebRequest request = WebRequest.Create(serverAddress + "/" + serverMethod);
-            request.ContentLength = imageByte.Length + stringToRequest.Length;
-            request.Method = "POST";
-            Stream dataStream = request.GetRequestStream();
-            // Write the data to the request stream.
-            dataStream.Write(stringToRequest, 0, stringToRequest.Length);
-            dataStream.Write(imageByte, 0, imageByte.Length);
-            // Close the Stream object.
-            dataStream.Close();
-            // Get the response.
-            WebResponse response = request.GetResponse();
-            // Display the status.
-            // Get the stream containing content returned by the server.
-            dataStream = response.GetResponseStream();
-            // Open the stream using a StreamReader for easy access.
-            StreamReader reader = new StreamReader(dataStream);
-            // Read the content.
-            string responseFromServer = reader.ReadToEnd();
-            // Display the content.
-            // Clean up the streams.
-            reader.Close();
-            dataStream.Close();
-            response.Close();
-            return responseFromServer;
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                using (var content = new MultipartFormDataContent())
+                {
+                    content.Add(new ByteArrayContent(imageByte), "file", "file.jpg");
+                    content.Add(new StringContent(strToPost), "attributes");
+                    try
+                    {
+                        var response = client.PostAsync(serverUriBuilder.Uri.AbsoluteUri, content).Result;
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            string responseString = response.Content.ReadAsStringAsync().Result;
+                            JObject result = JObject.Parse(responseString);
+                            return result;
+                        }
+                        else
+                        {
+                            string responseString = response.Content.ReadAsStringAsync().Result;
+                            throw new AddCustomerException(responseString, (int)response.StatusCode);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new AddCustomerException(e.Message);
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// Перегрузка предыдущего метода для отправки серверу только изображения
         /// </summary>
         /// <param name="serverAddress">Адрес сервера</param>
+        /// <param name="token">Токен авторизации</param>
         /// <param name="filename">Имя файла</param>
-        /// <param name="serverMethod">Метод сервера</param>
         /// <returns>Возвращает ответ сервера</returns>
 
-        public string postImageToServer(string serverAddress, string filename, string serverMethod)
+        public JObject Identify(string serverAddress, string token, string filename)
         {
+            UriBuilder serverUriBuilder = new UriBuilder(serverAddress);
+            serverUriBuilder.Path = "/identify";
+
             byte[] imageByte = File.ReadAllBytes(filename);
-           
+            File.Delete(filename);
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                using (var content = new MultipartFormDataContent())
+                {
+                    content.Add(new ByteArrayContent(imageByte), "file", "file.jpg");
+                    try
+                    {
+                        var response = client.PostAsync(serverUriBuilder.Uri.AbsoluteUri, content).Result;
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            string responseString = response.Content.ReadAsStringAsync().Result;
+                            JObject result = JObject.Parse(responseString);
+                            return result;
+                        }
+                        else
+                        {
+                            string responseString = response.Content.ReadAsStringAsync().Result;
+                            throw new IdentifyException(responseString, (int)response.StatusCode);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new IdentifyException(e.Message);
+                    }
+                }
+            }
             
-            WebRequest request = WebRequest.Create(serverAddress + "/" + serverMethod);
-            
-            request.ContentLength = imageByte.Length;
-            request.Method = "POST";
-            Stream dataStream = request.GetRequestStream();
-            // Write the data to the request stream.
-            //dataStream.Write(stringToRequest, 0, stringToRequest.Length);
-            dataStream.Write(imageByte, 0, imageByte.Length);
-            // Close the Stream object.
-            dataStream.Close();
-            // Get the response.
-            WebResponse response = request.GetResponse();
-            // Display the status.
-            // Get the stream containing content returned by the server.
-            dataStream = response.GetResponseStream();
-            // Open the stream using a StreamReader for easy access.
-            StreamReader reader = new StreamReader(dataStream);
-            // Read the content.
-            string responseFromServer = reader.ReadToEnd();
-            // Display the content.
-            // Clean up the streams.
-           
-            reader.Close();
-            response.Close();
-            return responseFromServer;
         }
 
         /// <summary>
@@ -207,6 +222,48 @@ namespace faceRecognition
         public void downloadFileFromServer(string filename, string serverAddress)
         {
             webClient.DownloadFile(serverAddress + "/download_image/images/" + filename, "images\\" + filename);
+        }
+
+        /// <summary>
+        /// Метод получения токена авторизации от сервера
+        /// </summary>
+        /// <param name="login">ЛОгин</param>
+        /// <param name="password">Пароль</param>
+        /// <param name="serverAddress">Адрес сервера</param>
+        /// <returns></returns>
+        public static string Auth(string login, string password, string serverAddress)
+        {
+            UriBuilder serverUriBuilder = new UriBuilder(serverAddress);
+            serverUriBuilder.Path= "/auth";
+
+            JObject body = new JObject
+            {
+                { "login", login },
+                { "password", password }
+            };
+
+            var content = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
+
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage responseMessage = client.PostAsync(serverUriBuilder.Uri, content).Result;
+                    if (responseMessage.StatusCode == HttpStatusCode.OK)
+                    {
+                        JObject result = JObject.Parse(responseMessage.Content.ReadAsStringAsync().Result);
+                        return result.Value<string>("token");
+                    }
+                    else
+                    {
+                        throw new AuthException(responseMessage.Content.ReadAsStringAsync().Result, (int)responseMessage.StatusCode);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new AuthException($"{e.Message}, {e.StackTrace}", -1);
+                }
+            }
         }
 
         public void Dispose()

@@ -18,6 +18,8 @@ using Emgu.Util;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
+using faceRecognition.Exceptions;
+using Newtonsoft.Json.Linq;
 
 namespace faceRecognition
 {
@@ -29,7 +31,6 @@ namespace faceRecognition
         // Объявление форм
         FormCalibrateAndSetServer formSettings = new FormCalibrateAndSetServer();
         FormAddToDB formAddToDB = new FormAddToDB();
-        FormFullTextSearch formFullTextSearch = new FormFullTextSearch();
 
         Capture capWebcam = null;
         getWebCam getWebCam = new getWebCam();
@@ -42,13 +43,16 @@ namespace faceRecognition
         Task deleteRecordTask;
         Task sendPostRequestTask;
         static bool requestIsStarted;
-        static int idInDb = 0;
+        static string idInDb = "";
         static bool stringResponsed = false;
         static bool buttonEnable = true;
-        static string responsedString;
+        static JToken responseFromServer = null;
         public int maxFace;
         public int minFace;
         public string address = "";
+        public string login = "";
+        public string password = "";
+        public string token = "";
         int currentIndex = 0;
 
         public FormIdentify()
@@ -68,6 +72,22 @@ namespace faceRecognition
             else
             {
                 settingsLoad();
+
+                if(!string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(password) && !string.IsNullOrEmpty(address))
+                {
+                    try
+                    {
+                        token = WebTools.Auth(login, password, address);
+                    }catch (AuthException ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
+                }
+                else
+                {
+                    formSettings.identifyForm = this;
+                    formSettings.ShowDialog();
+                }
             }
 
             try
@@ -130,7 +150,6 @@ namespace faceRecognition
             }
             //Если запрос стартовал, выключаем кнопки
             buttonIdentify.Enabled = !requestIsStarted;
-            btnAddNewImage.Enabled = !addingImageStarted;
 
             //Если лиц не найдено
             if (Faces[0].Length == 0)
@@ -174,42 +193,41 @@ namespace faceRecognition
         {
             //Функция обновленя таблицы
 
-            if (responsedString != "" && responsedString != null)
+            if (responseFromServer != null)
             {
                 currentIndex = 0;
                 lblFoundStatus.Text  = "Пользователь найден";
                 //Десериализуем JSON строку
-                var jsonDict = new JavaScriptSerializer().Deserialize<Dictionary<string, dynamic>>(responsedString);
-                idInDb = jsonDict["id"];
-                //Формирование списка с именами файлов
-                filenames = new List<string>(jsonDict["filenames"].Keys);
+                var jsonDict = new JavaScriptSerializer().Deserialize<Dictionary<string, dynamic>>(responseFromServer.Value<string>("attributes"));
+                idInDb = responseFromServer.Value<string>("id");
                 //Устанавливаем изображение в поле IdentifyedUser
-                Image<Rgb, Byte> downlodadedImage = new Image<Rgb, Byte>(@"images\" + filenames[currentIndex]);
-                IdentifyedUser.Image = downlodadedImage;
+                //TODO сделать запрос изображений
+                //Image<Rgb, Byte> downlodadedImage = new Image<Rgb, Byte>(@"images\" + filenames[currentIndex]);
+                //IdentifyedUser.Image = downlodadedImage;
                 //Формирование списка названий полей
-                List<string> listOfKeys = new List<string>(jsonDict["content"].Keys);
+                List<string> listOfKeys = new List<string>(jsonDict.Keys);
                 dataTableIndent.Rows.Clear();
                 toolButtonPanel.Visible = false;
                 //Устанавливаем значания в таблицу
-                for (int i = 0; i < jsonDict["content"].Count; i++)
+                for (int i = 0; i < jsonDict.Count; i++)
                 {
                      dataTableIndent.Rows.Add();
                      dataTableIndent["Название поля", i].Value = (String)listOfKeys[i];
-                     dataTableIndent["Содержание поля", i].Value = (String)jsonDict["content"][listOfKeys[i]];
+                     dataTableIndent["Содержание поля", i].Value = (String)jsonDict[listOfKeys[i]];
                 }
             }
-            else if (responsedString == "")
+            else
             {
                 dataTableIndent.Rows.Clear();
                 toolButtonPanel.Visible = false;
                 lblFoundStatus.Text = "Пользователь не найден, добавьте его";
             }
-            responsedString = null;
+            responseFromServer = null;
             
 
         }
 
-        async void sendPostRequest()
+        async void Identify()
         {
             //Функция отправки POST запроса (выполняется асинхронно)
             requestIsStarted = true;
@@ -217,32 +235,33 @@ namespace faceRecognition
             {
                 WebTools postClass = new WebTools(); //Экземпляр класса WebTool
 
-                string responseFromServer = postClass.postImageToServer(address, "savedIdentifyFrame.jpg", "identify_and_search_user");
                 
-                string[] resultOfRequest = System.Text.RegularExpressions.Regex.Split(responseFromServer, @"<content>");
-                if (resultOfRequest[0] == "Succsess POST")
+                try
                 {
-                    //Скачивание файлов с сервера (имена файлов берутся из JSON строки)
-                    var jsonDict = new JavaScriptSerializer().Deserialize<Dictionary<string, dynamic>>(resultOfRequest[1]);
-                    List<string> listOfKeys = new List<string>(jsonDict["filenames"].Keys);
-                    WebTools downloadTool = new WebTools();
-                    for (int i = 0; i < listOfKeys.Count; i++)
-                    {
-                        downloadTool.downloadFileFromServer(listOfKeys[i], address);
-                    }
-                        
-                    requestIsStarted = false;
-                    //buttonEnable = true;
-                    stringResponsed = true;
-                    responsedString = resultOfRequest[1];
+                    responseFromServer = postClass.Identify(address, token, "savedIdentifyFrame.jpg");
                 }
-                else if (resultOfRequest[0] == "NOTFOUND")
+                catch (IdentifyException e)
                 {
-                    responsedString = "";
+                    responseFromServer = null;
                     requestIsStarted = false;
                     //buttonEnable = true;
                     stringResponsed = true;
                 }
+
+                //TODO сделать скачивание с сервера
+
+                ////Скачивание файлов с сервера (имена файлов берутся из JSON строки)
+                //var jsonDict = new JavaScriptSerializer().Deserialize<Dictionary<string, dynamic>>(resultOfRequest[1]);
+                //List<string> listOfKeys = new List<string>(jsonDict["filenames"].Keys);
+                //WebTools downloadTool = new WebTools();
+                //for (int i = 0; i < listOfKeys.Count; i++)
+                //{
+                //    downloadTool.downloadFileFromServer(listOfKeys[i], address);
+                //}
+
+                requestIsStarted = false;
+                //buttonEnable = true;
+                stringResponsed = true;
             }
             catch (Exception e)
             {
@@ -261,6 +280,8 @@ namespace faceRecognition
             dict.Add("address", address);
             dict.Add("maxFace", maxFace);
             dict.Add("minFace", minFace);
+            dict.Add("login", login);
+            dict.Add("password", password);
             string jsonString = new JavaScriptSerializer().Serialize(dict);
             File.WriteAllText("settings.json", jsonString);
         }
@@ -269,10 +290,31 @@ namespace faceRecognition
             //Функция загрузки настроек
 
             var jsonDict = new JavaScriptSerializer().Deserialize<Dictionary<string, dynamic>>(File.ReadAllText("settings.json"));
-            address = jsonDict["address"];
-            maxFace = jsonDict["maxFace"];
-            minFace = jsonDict["minFace"];
+            
+            if (jsonDict.ContainsKey("address"))
+            {
+                address = jsonDict["address"];
+            }
 
+            if (jsonDict.ContainsKey("maxFace"))
+            {
+                maxFace = jsonDict["maxFace"];
+            }
+
+            if (jsonDict.ContainsKey("minFace"))
+            {
+                minFace = jsonDict["minFace"];
+            }
+
+            if (jsonDict.ContainsKey("login"))
+            {
+                login = jsonDict["login"];
+            }
+            
+            if (jsonDict.ContainsKey("password"))
+            {
+                password = jsonDict["password"];
+            }
         }
         private string formingDataString()
         {
@@ -318,81 +360,15 @@ namespace faceRecognition
             formAddToDB.address = address;
             formAddToDB.maxFace = maxFace;
             formAddToDB.minFace = minFace;
+            formAddToDB.token = token;
             formAddToDB.ShowDialog();
             lblFoundStatus.Text = "";
-        }
-
-        private void btnSearch_Click(object sender, EventArgs e)
-        {
-            //Запуск формы formFullTextSearch
-
-            formFullTextSearch.address = address;
-            formFullTextSearch.ShowDialog();
         }
 
         private void dataTableIndent_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             //Если идентификация прошла и данные в таблице сменились
             toolButtonPanel.Visible = true;
-        }
-
-        private void buttonDeleteRecord_Click(object sender, EventArgs e)
-        {
-            //Обработка нажатия кнопки buttonDeleteRecord
-
-            deleteRecordTask = Task.Run(() => deleteRecord(idInDb)); //Запуск Task
-            dataTableIndent.Rows.Clear();
-            IdentifyedUser.Image = null;
-            toolButtonPanel.Visible = false;
-        }        
-        async void deleteRecord(int id)
-        {
-            //Функция удаления записи по id (асинхронно)
-
-            WebTools deletingRecordOnServer = new WebTools(); //Экземпляр класса WebTools
-            try
-            {
-                string response = deletingRecordOnServer.deleteRecordRequest(address, id);
-                if (response != "<OK>")
-                {
-                    MessageBox.Show("Не удалено");
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        async void updateRecord(int id, string updatedString)
-        {
-            //Функция обновления записи
-
-            WebTools updatingRecordOnServer = new WebTools();
-            try
-            {
-                string response = updatingRecordOnServer.updateRecordRequest(address, id, updatedString);
-                if (response != "<OK>")
-                {
-                    MessageBox.Show("Не обновлено");
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        private void buttonUpdateRecord_Click(object sender, EventArgs e)
-        {
-            //обработчик нажатий кнопки buttonUpdateRecord
-
-            string updatedString = formingDataString();
-            if (updatedString != "NOT OK")
-            {
-                updateRecordTask = Task.Run(() => updateRecord(idInDb, updatedString));
-            }
-
         }
 
         private void buttonIdentify_Click(object sender, EventArgs e)
@@ -408,18 +384,10 @@ namespace faceRecognition
                     imageToPost.Save("savedIdentifyFrame.jpg");
                     lblFoundStatus.Text = "";
                     lblSearching.Text = "Идет поиск, ожидайте...";
-                    sendPostRequestTask = Task.Run(() => sendPostRequest());
+                    sendPostRequestTask = Task.Run(() => Identify());
                 }
                 catch (Exception exc) { MessageBox.Show(exc.ToString()); }
             }
-        }
-
-        private void clearTable_Click(object sender, EventArgs e)
-        {
-            //обработчик нажатий кнопки clearTable_Click
-
-            dataTableIndent.Rows.Clear();
-            toolButtonPanel.Visible = false;
         }
 
 
@@ -431,6 +399,8 @@ namespace faceRecognition
             formSettings.faceMax = maxFace;
             formSettings.faceMin = minFace;
             formSettings.address = address;
+            formSettings.login = login;
+            formSettings.password = password;
             formSettings.ShowDialog();
         }
 
@@ -473,42 +443,6 @@ namespace faceRecognition
             foreach (var v in filesToDelete)
             {
                 File.Delete(v);
-            }
-        }
-
-        private void btnAddNewImage_Click(object sender, EventArgs e)
-        {
-            if (idInDb != 0 && readyToIdentify)
-            {
-                Image<Bgr, Byte> imageToAdd = capWebcam.QueryFrame();
-                imageToAdd.Save("imageToAdd.jpg");
-                Task addNewImageTask = Task.Run(() => addNewImage(idInDb));
-            }
-        }
-        async void addNewImage(int id)
-        {
-            //Функция добавления нового изображения
-
-            addingImageStarted = true;
-            try
-            {
-                WebTools addImage = new WebTools();
-                string request = addImage.postImageToServer(address, "imageToAdd.jpg", "add_new_image", id.ToString());
-                if (request == "<UPDATED>")
-                {
-                    addingImageStarted = false;
-                    MessageBox.Show("Добавлено".ToString());
-                }
-                else
-                {
-                    addingImageStarted = false;
-                    MessageBox.Show("Не добавлено".ToString());
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-                addingImageStarted = false;
             }
         }
     }

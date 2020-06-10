@@ -41,6 +41,10 @@
             this.label2 = new System.Windows.Forms.Label();
             this.Port = new System.Windows.Forms.NumericUpDown();
             this.minn = new System.Windows.Forms.Label();
+            this.loginLbl = new System.Windows.Forms.Label();
+            this.passwordLbl = new System.Windows.Forms.Label();
+            this.loginTxt = new System.Windows.Forms.TextBox();
+            this.passwordTxt = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.VideoStream)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TBMax)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TBMin)).BeginInit();
@@ -116,9 +120,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(347, 214);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(89, 13);
+            this.label1.Size = new System.Drawing.Size(83, 13);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Адресс сервера";
+            this.label1.Text = "Адрес сервера";
             // 
             // serverAddress
             // 
@@ -158,11 +162,48 @@
             this.minn.TabIndex = 14;
             this.minn.Text = "Минимальный \r\nразмер \r\nлица";
             // 
+            // loginLbl
+            // 
+            this.loginLbl.AutoSize = true;
+            this.loginLbl.Location = new System.Drawing.Point(350, 250);
+            this.loginLbl.Name = "loginLbl";
+            this.loginLbl.Size = new System.Drawing.Size(38, 13);
+            this.loginLbl.TabIndex = 15;
+            this.loginLbl.Text = "Логин";
+            // 
+            // passwordLbl
+            // 
+            this.passwordLbl.AutoSize = true;
+            this.passwordLbl.Location = new System.Drawing.Point(500, 250);
+            this.passwordLbl.Name = "passwordLbl";
+            this.passwordLbl.Size = new System.Drawing.Size(45, 13);
+            this.passwordLbl.TabIndex = 16;
+            this.passwordLbl.Text = "Пароль";
+            // 
+            // loginTxt
+            // 
+            this.loginTxt.Location = new System.Drawing.Point(394, 247);
+            this.loginTxt.Name = "loginTxt";
+            this.loginTxt.Size = new System.Drawing.Size(100, 20);
+            this.loginTxt.TabIndex = 17;
+            // 
+            // passwordTxt
+            // 
+            this.passwordTxt.Location = new System.Drawing.Point(551, 247);
+            this.passwordTxt.Name = "passwordTxt";
+            this.passwordTxt.PasswordChar = '*';
+            this.passwordTxt.Size = new System.Drawing.Size(100, 20);
+            this.passwordTxt.TabIndex = 18;
+            // 
             // FormCalibrateAndSetServer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(836, 251);
+            this.ClientSize = new System.Drawing.Size(836, 275);
+            this.Controls.Add(this.passwordTxt);
+            this.Controls.Add(this.loginTxt);
+            this.Controls.Add(this.passwordLbl);
+            this.Controls.Add(this.loginLbl);
             this.Controls.Add(this.minn);
             this.Controls.Add(this.Port);
             this.Controls.Add(this.label2);
@@ -204,5 +245,9 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown Port;
         private System.Windows.Forms.Label minn;
+        private System.Windows.Forms.Label loginLbl;
+        private System.Windows.Forms.Label passwordLbl;
+        private System.Windows.Forms.TextBox loginTxt;
+        private System.Windows.Forms.TextBox passwordTxt;
     }
 }

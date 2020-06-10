@@ -18,7 +18,7 @@ using Emgu.CV.Cvb;
 using Emgu.Util;
 using System.Net;
 using System.Web.Script.Serialization;
-
+using Newtonsoft.Json.Linq;
 
 namespace faceRecognition
 {
@@ -33,6 +33,7 @@ namespace faceRecognition
         public int maxFace;
         public int minFace;
         public string address;
+        public string token;
         public FormAddToDB()
         {
             InitializeComponent();
@@ -117,7 +118,7 @@ namespace faceRecognition
             
         }
 
-        async void addUser(bool newUser)
+        async void addUser()
         {
             //Функция добавления пользователя (асинх.)
 
@@ -128,19 +129,7 @@ namespace faceRecognition
                 if (jsonString != "NOT OK")
                 {
                     WebTools postImageAndUserInfo = new WebTools();
-                    if (newUser)
-                    {
-                        string responseFromServer = postImageAndUserInfo.postImageToServer(address, "savedAddFrame.jpg", "append_user_to_db", jsonString);
-                        
-                    }
-                    else
-                    {
-                        string responseFromServer = postImageAndUserInfo.postImageToServer(address, "savedAddFrame.jpg", "update_user_record_or_add_new", jsonString);
-                        if (responseFromServer == "<BAD DESCRIPTOR>")
-                        {
-                            MessageBox.Show("Лицо не обнаружено");
-                        }
-                    }
+                    JObject customerInfo = postImageAndUserInfo.AddCustomer(address, token, "savedAddFrame.jpg", jsonString);
                     
                 }
                 
@@ -265,15 +254,8 @@ namespace faceRecognition
                 {
                     Image<Bgr, Byte> imageToAdd = capWebcamAdd.QueryFrame();
                     imageToAdd.Save("savedAddFrame.jpg");
-                    if (chkAddMethod.Checked)
-                    {
-                        sendPostRequestTask = Task.Run(() => addUser(chkAddMethod.Checked));
-                    }
-                    else
-                    {
-                        sendPostRequestTask = Task.Run(() => addUser(chkAddMethod.Checked));
-                    }
-                    
+                    sendPostRequestTask = Task.Run(() => addUser());
+
                 }
                 catch (Exception exception)
                 {

@@ -13,7 +13,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.UI;
 using Emgu.CV.Cvb;
 using Emgu.Util;
-
+using faceRecognition.Exceptions;
 
 namespace faceRecognition
 {
@@ -24,6 +24,8 @@ namespace faceRecognition
         public int faceMin;
         public string address;
         public FormIdentify identifyForm;
+        public string login = "";
+        public string password = "";
         HaarCascade cascade = new HaarCascade("haarcascade_frontalface_default.xml"); //Объвление каскада Хаара
         Capture capWebcam = null;
         getWebCam getWebCam = new getWebCam();
@@ -46,6 +48,8 @@ namespace faceRecognition
             TBMin.Value = faceMin;
             lblTBValueMAX.Text = TBMax.Value.ToString();
             lblTBValueMIN.Text = TBMin.Value.ToString();
+            loginTxt.Text = login;
+            passwordTxt.Text = password;
             if (address != null)
             {
                 string[] splittedAddress = address.Split(':');
@@ -65,12 +69,30 @@ namespace faceRecognition
 
         private void FormCalibrateAndSetServer_FormClosed(object sender, FormClosedEventArgs e)
         {
-            address = serverAddress.Text + ":" + Port.Value.ToString();
-            identifyForm.maxFace = faceMax;
-            identifyForm.minFace = faceMin;
-            identifyForm.address = address;
-            this.Close();
-            Application.Idle -= processFrameAndUpdGui;
+            string token = null;
+            if (!string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(password) && !string.IsNullOrEmpty(address))
+            {
+                try
+                {
+                    token = WebTools.Auth(login, password, address);
+                    identifyForm.token = token;
+                }
+                catch (AuthException ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+                finally
+                {
+                    address = serverAddress.Text + ":" + Port.Value.ToString();
+                    identifyForm.maxFace = faceMax;
+                    identifyForm.minFace = faceMin;
+                    identifyForm.address = address;
+                    identifyForm.login = loginTxt.Text;
+                    identifyForm.password = passwordTxt.Text;
+                    this.Close();
+                    Application.Idle -= processFrameAndUpdGui;
+                }
+            }
         }
 
         private void TBMax_Scroll(object sender, EventArgs e)

@@ -35,24 +35,24 @@
             this.tableLayoutElements = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutLbl = new System.Windows.Forms.FlowLayoutPanel();
             this.lblInfo = new System.Windows.Forms.Label();
+            this.btnsTableLayout = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutBtns = new System.Windows.Forms.FlowLayoutPanel();
             this.removeRow = new System.Windows.Forms.Button();
             this.addRow = new System.Windows.Forms.Button();
+            this.flowCheckAndBtn = new System.Windows.Forms.FlowLayoutPanel();
+            this.chkAddMethod = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.пресетыToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.сохранитьВФайлToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.загрузитьИзФайлаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnsTableLayout = new System.Windows.Forms.TableLayoutPanel();
-            this.flowCheckAndBtn = new System.Windows.Forms.FlowLayoutPanel();
-            this.chkAddMethod = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.VideoBox)).BeginInit();
             this.tableLayoutElements.SuspendLayout();
             this.flowLayoutLbl.SuspendLayout();
-            this.flowLayoutBtns.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
             this.btnsTableLayout.SuspendLayout();
+            this.flowLayoutBtns.SuspendLayout();
             this.flowCheckAndBtn.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dataTable
@@ -126,6 +126,21 @@
             this.lblInfo.Size = new System.Drawing.Size(0, 13);
             this.lblInfo.TabIndex = 40;
             // 
+            // btnsTableLayout
+            // 
+            this.btnsTableLayout.ColumnCount = 1;
+            this.btnsTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.btnsTableLayout.Controls.Add(this.flowLayoutBtns, 0, 0);
+            this.btnsTableLayout.Controls.Add(this.flowCheckAndBtn, 0, 1);
+            this.btnsTableLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnsTableLayout.Location = new System.Drawing.Point(524, 308);
+            this.btnsTableLayout.Name = "btnsTableLayout";
+            this.btnsTableLayout.RowCount = 2;
+            this.btnsTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52.38095F));
+            this.btnsTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 47.61905F));
+            this.btnsTableLayout.Size = new System.Drawing.Size(515, 84);
+            this.btnsTableLayout.TabIndex = 41;
+            // 
             // flowLayoutBtns
             // 
             this.flowLayoutBtns.Controls.Add(this.removeRow);
@@ -156,6 +171,27 @@
             this.addRow.Text = "Добавить поле";
             this.addRow.UseVisualStyleBackColor = true;
             this.addRow.Click += new System.EventHandler(this.addRow_Click);
+            // 
+            // flowCheckAndBtn
+            // 
+            this.flowCheckAndBtn.Controls.Add(this.btnAddToDB);
+            this.flowCheckAndBtn.Controls.Add(this.chkAddMethod);
+            this.flowCheckAndBtn.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowCheckAndBtn.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.flowCheckAndBtn.Location = new System.Drawing.Point(3, 46);
+            this.flowCheckAndBtn.Name = "flowCheckAndBtn";
+            this.flowCheckAndBtn.Size = new System.Drawing.Size(509, 35);
+            this.flowCheckAndBtn.TabIndex = 40;
+            // 
+            // chkAddMethod
+            // 
+            this.chkAddMethod.AutoSize = true;
+            this.chkAddMethod.Location = new System.Drawing.Point(186, 3);
+            this.chkAddMethod.Name = "chkAddMethod";
+            this.chkAddMethod.Size = new System.Drawing.Size(170, 17);
+            this.chkAddMethod.TabIndex = 38;
+            this.chkAddMethod.Text = "Добавить как новую запись";
+            this.chkAddMethod.UseVisualStyleBackColor = true;
             // 
             // menuStrip1
             // 
@@ -190,42 +226,6 @@
             this.загрузитьИзФайлаToolStripMenuItem.Text = "Загрузить из файла";
             this.загрузитьИзФайлаToolStripMenuItem.Click += new System.EventHandler(this.loadFromFileToolStripMenuItem_Click);
             // 
-            // btnsTableLayout
-            // 
-            this.btnsTableLayout.ColumnCount = 1;
-            this.btnsTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.btnsTableLayout.Controls.Add(this.flowLayoutBtns, 0, 0);
-            this.btnsTableLayout.Controls.Add(this.flowCheckAndBtn, 0, 1);
-            this.btnsTableLayout.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnsTableLayout.Location = new System.Drawing.Point(524, 308);
-            this.btnsTableLayout.Name = "btnsTableLayout";
-            this.btnsTableLayout.RowCount = 2;
-            this.btnsTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52.38095F));
-            this.btnsTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 47.61905F));
-            this.btnsTableLayout.Size = new System.Drawing.Size(515, 84);
-            this.btnsTableLayout.TabIndex = 41;
-            // 
-            // flowCheckAndBtn
-            // 
-            this.flowCheckAndBtn.Controls.Add(this.btnAddToDB);
-            this.flowCheckAndBtn.Controls.Add(this.chkAddMethod);
-            this.flowCheckAndBtn.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowCheckAndBtn.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowCheckAndBtn.Location = new System.Drawing.Point(3, 46);
-            this.flowCheckAndBtn.Name = "flowCheckAndBtn";
-            this.flowCheckAndBtn.Size = new System.Drawing.Size(509, 35);
-            this.flowCheckAndBtn.TabIndex = 40;
-            // 
-            // chkAddMethod
-            // 
-            this.chkAddMethod.AutoSize = true;
-            this.chkAddMethod.Location = new System.Drawing.Point(186, 3);
-            this.chkAddMethod.Name = "chkAddMethod";
-            this.chkAddMethod.Size = new System.Drawing.Size(170, 17);
-            this.chkAddMethod.TabIndex = 38;
-            this.chkAddMethod.Text = "Добавить как новую запись";
-            this.chkAddMethod.UseVisualStyleBackColor = true;
-            // 
             // FormAddToDB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -247,12 +247,12 @@
             this.tableLayoutElements.ResumeLayout(false);
             this.flowLayoutLbl.ResumeLayout(false);
             this.flowLayoutLbl.PerformLayout();
-            this.flowLayoutBtns.ResumeLayout(false);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.btnsTableLayout.ResumeLayout(false);
+            this.flowLayoutBtns.ResumeLayout(false);
             this.flowCheckAndBtn.ResumeLayout(false);
             this.flowCheckAndBtn.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
